@@ -1,13 +1,31 @@
 '''
     This script takes the json from a CONDAQA dataset partition and groups it by ORIGINAL PASSAGE, then QUESTION, then EDIT
     The output is a list of( (each original passage's) list of( question and list of (edited passages and editID and label)) )
-
-	!!!I still need some work to turn it into a DataLoader (or maybe just print out to another json file)
 '''
 
 import re, json
+from sys import argv
 
-def json2data(url):
+def sortByQuestion(gathered):
+	questions = set(d["question"] for d in gathered)
+	return [
+			{
+				"question":q, 
+				"contexts":[
+							{
+								"passage":e["passage"], 
+								"editID":e["editID"], 
+								"label":e["label"]
+							} 
+	 						for e in gathered 
+							if e["question"] == q
+						   ]
+			} 
+	 			for q in questions
+		   ]
+
+
+def json2data(url, sortBy=sortByQuestion):
 	with open(url, "r") as file:
 		text = file.read()
 	jsonArray = "[" + re.sub("\n", ",", text[:-1]) + "]" #format as json array
@@ -16,25 +34,54 @@ def json2data(url):
 	passageIDs = set(d["PassageID"] for d in jsonData)
 	
 	def gather(pId):
-		return [{"editID":d["PassageEditID"], "passage":d['sentence1'], "question":d['sentence2'], "label":d['label']} for d in jsonData if d["PassageID"] == pId]
-	def sortByQuestion(gathered):
-		questions = set(d["question"] for d in gathered)
-		return [{"question":q, "contexts":[{"passage":e["passage"], "editID":e["editID"], "label":e["label"]} for e in gathered if e["question"] == q]} for q in questions]
+		return [
+					{
+						"editID":d["PassageEditID"], 
+						"passage":d['sentence1'], 
+						"question":d['sentence2'], 
+						"label":d['label']
+					} 
+					for d in jsonData 
+					if d["PassageID"] == pId
+			   ]
 	
-	return [sortByQuestion(gather(i)) for i in passageIDs]
+	return [sortBy(gather(i)) for i in passageIDs]
 
 def json2bundles(url):
 	data = json2data(url)
 	bundles = []
 
 	for passage in data:
+		curr_bundles = []
 		for bundle in passage:
-			bundles.append(
+			curr_bundles.append(
 				{
 					"input": [(bundle['question'] + '\n' + context['passage']) for context in bundle['contexts']],
 					"answer": [(context['label']) for context in bundle['contexts']]
 				}
 			)
+
+		if '-mq' in argv: #multi-question
+			None # merge the bundles together
+			complete_input = []; complete_answer = []
+			for b in curr_bundles:
+				complete_input.extend(b['input']); complete_answer.extend(b['answer'])
+			curr_bundles = [{"input":complete_input, "answer":complete_answer}]
+		if '-fa' in argv: #filter-answers
+			filtered_bundles = []
+			for bun in curr_bundles:
+				bun_in = bun['input']; bun_ans = bun['answer']
+				filt_in = []; filt_ans = []
+				ansset = set()
+				for que, ans in zip(bun_in, bun_ans):
+					if ans not in ansset:
+						ansset.add(ans)
+						filt_in.append(que)
+						filt_ans.append(ans)
+				filtered_bundles.append({"input":filt_in, "answer":filt_ans})
+			curr_bundles = filtered_bundles
+		
+		bundles.extend(curr_bundles)
 
 	return bundles
 
