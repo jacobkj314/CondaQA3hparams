@@ -5,6 +5,15 @@
 
 import re, json
 from sys import argv
+from random import shuffle
+
+def same(items):
+	'''
+	A helper method to avoid getting bundles consisting of all the same answer
+	'''
+	if len(items) <= 1:
+		return True
+	return all(i==items[0] for i in items)
 
 def sortByQuestion(gathered):
 	questions = set(d["question"] for d in gathered)
@@ -67,7 +76,7 @@ def json2bundles(url):
 			for b in curr_bundles:
 				complete_input.extend(b['input']); complete_answer.extend(b['answer'])
 			curr_bundles = [{"input":complete_input, "answer":complete_answer}]
-		if '-fa' in argv: #filter-answers
+		'''if '-fa' in argv: #filter-answers
 			filtered_bundles = []
 			for bun in curr_bundles:
 				bun_in = bun['input']; bun_ans = bun['answer']
@@ -79,6 +88,26 @@ def json2bundles(url):
 						filt_in.append(que)
 						filt_ans.append(ans)
 				filtered_bundles.append({"input":filt_in, "answer":filt_ans})
+			curr_bundles = filtered_bundles'''
+		if '-fa' in argv: #filter-answers
+			filtered_bundles = []
+			for bun in curr_bundles:
+				while not same(bun['answer']): # # # 
+					next_bun_in = []; next_bun_ans = [] # # #
+					bun_in = bun['input']; bun_ans = bun['answer']
+					filt_in = []; filt_ans = []
+					ansset = set()
+					queAns = list(zip(bun_in, bun_ans)); shuffle(queAns) # # #
+					for que, ans in queAns:
+						if ans not in ansset:
+							ansset.add(ans)
+							filt_in.append(que)
+							filt_ans.append(ans)
+						else: # # #
+							next_bun_in.append(que) # # #
+							next_bun_ans.append(ans) # # #
+					bun = {"input":next_bun_in, "answer":next_bun_ans}# # #
+					filtered_bundles.append({"input":filt_in, "answer":filt_ans})
 			curr_bundles = filtered_bundles
 		
 		bundles.extend(curr_bundles)
@@ -95,3 +124,4 @@ def bundle(source, destination):
 			out.write(json.dumps(bundle) + '\n')
 
 bundle("data/condaqa_train.json", "data/unifiedqa_formatted_data/condaqa_train_unifiedqa.json")
+
