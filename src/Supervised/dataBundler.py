@@ -70,25 +70,29 @@ def json2bundles(url):
 				}
 			)
 
+		'''
+		Without this flag, a bundle will consist of a single question paired with a wikipedia sample and its edits, as well as the corresponding answers
+		With this option, it means that, for each original wikipedia text sample, ALL questions about that text sample and its edits can occur in the same bundle
+		(This can result in large bundles and possible out-of-memory errors when the -fa flag is not also used)
+		'''
 		if '-mq' in argv: #multi-question
 			None # merge the bundles together
 			complete_input = []; complete_answer = []
 			for b in curr_bundles:
 				complete_input.extend(b['input']); complete_answer.extend(b['answer'])
 			curr_bundles = [{"input":complete_input, "answer":complete_answer}]
-		'''if '-fa' in argv: #filter-answers
-			filtered_bundles = []
-			for bun in curr_bundles:
-				bun_in = bun['input']; bun_ans = bun['answer']
-				filt_in = []; filt_ans = []
-				ansset = set()
-				for que, ans in zip(bun_in, bun_ans):
-					if ans not in ansset:
-						ansset.add(ans)
-						filt_in.append(que)
-						filt_ans.append(ans)
-				filtered_bundles.append({"input":filt_in, "answer":filt_ans})
-			curr_bundles = filtered_bundles'''
+
+
+		'''
+		Without this flag, a bundle can contain instances that have the same answer.
+		With this flag, a bundle will be broken into multiple bundles, where each instance in a given bundle has a unique answer. 
+			This is accomplished by shuffling the instances, and then iteratively forming bundles with unique answers.
+			I.E.: if the set of instances' answers are 											{yes, no, don't know, yes, no, no, no, yes, don't know}, then:
+				the first bundle will have as answers {yes, no, don't know}, leaving behind 	{___, __, __________, yes, no, no, no, yes, don't know}
+				the second bundle will have as answers {yes, no, don't know}, leaving behind 	{___, __, __________, ___, __, no, no, yes, __________}
+				the third bundle will have as answers {no, yes}, leaving behind 				{___, __, __________, ___, __, __, no, ___, __________}
+				and the remaining instance answered "no" will not be bundled
+		'''
 		if '-fa' in argv: #filter-answers
 			filtered_bundles = []
 			for bun in curr_bundles:
