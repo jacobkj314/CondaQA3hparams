@@ -71,7 +71,24 @@ def json2bundles(url):
 			)
 
 		'''
-		This is one more attempt to bundle the data in a helpful way 
+		This is one more attempt to bundle the data in a helpful way:
+
+		bad example:
+		{
+		Q1 : Yes No idk
+		Q2 : No ~~No~~ 
+		D3 : yes idk
+		}
+
+		good example:
+		{
+		Q1 : Yes No idk
+		Q2 : No Yes
+		D3 : yes idk
+		}  
+
+		i.e., within a bundle, there CAN BE repeat answers, but not within a question
+
 		'''
 		if '-mqfa3' in argv:
 			filtered_bundles = []
@@ -140,6 +157,12 @@ def json2bundles(url):
 					filtered_bundles.append({"input":filt_in, "answer":filt_ans})
 			curr_bundles = filtered_bundles
 		
+		if '-mqfa3' in argv:# PART II of this option - to make the bundles smaller to fit in memory
+			sized_bundles = []
+			for bun in curr_bundles:
+				sized_bundles.append({"input":bun['input'][:6], "answer":bun['answer'][:6]})
+			curr_bundles = sized_bundles
+			
 		bundles.extend(curr_bundles)
 
 	return bundles
