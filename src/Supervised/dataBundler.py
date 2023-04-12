@@ -71,6 +71,32 @@ def json2bundles(url):
 			)
 
 		'''
+		This is one more attempt to bundle the data in a helpful way 
+		'''
+		if '-mqfa3' in argv:
+			filtered_bundles = []
+			for bun in curr_bundles:
+				if True:# # # while not same(bun['answer']): # # # 
+					# # #next_bun_in = []; next_bun_ans = [] # # #
+					bun_in = bun['input']; bun_ans = bun['answer']
+					filt_in = []; filt_ans = []
+					ansset = set()
+					queAns = list(zip(bun_in, bun_ans)); # # # shuffle(queAns) # # #
+					for que, ans in queAns:
+						if ans not in ansset:
+							ansset.add(ans)
+							filt_in.append(que)
+							filt_ans.append(ans)
+						'''else: # # #
+							next_bun_in.append(que) # # #
+							next_bun_ans.append(ans) # # #'''
+					# # # bun = {"input":next_bun_in, "answer":next_bun_ans}# # #
+					filtered_bundles.append({"input":filt_in, "answer":filt_ans})
+			curr_bundles = filtered_bundles
+			argv.append('-mq')
+
+
+		'''
 		Without this flag, a bundle will consist of a single question paired with a wikipedia sample and its edits, as well as the corresponding answers
 		With this option, it means that, for each original wikipedia text sample, ALL questions about that text sample and its edits can occur in the same bundle
 		(This can result in large bundles and possible out-of-memory errors when the -fa flag is not also used)
