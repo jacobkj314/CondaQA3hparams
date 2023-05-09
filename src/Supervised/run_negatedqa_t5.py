@@ -56,7 +56,7 @@ require_version("datasets>=1.8.0", "To fix: pip install -r examples/pytorch/summ
 logger = logging.getLogger(__name__)
 
 # # # Here we import the changes I made to use Contrastive Estimation:
-from ceUtils import forwardCE, Seq2SeqTrainerCE
+from ceUtils import forwardCE, Seq2SeqTrainerCE, BundleCollatorForSeq2Seq
 
 try:
     nltk.data.find("tokenizers/punkt")
@@ -505,7 +505,7 @@ def main():
     # # # I also created a separate preprocess_function with bundles for the training set only
     def preprocess_function_bundles(examples): #with bundles
 
-        padding = "max_length" # # # I changed the value of padding
+        padding = True # # # I changed the value of padding
 
         inputs = examples[text_column]
         targets = examples[summary_column]
@@ -587,7 +587,7 @@ def main():
 
     # Data collator
     label_pad_token_id = -100 if data_args.ignore_pad_token_for_loss else tokenizer.pad_token_id
-    data_collator = DataCollatorForSeq2Seq(
+    data_collator = BundleCollatorForSeq2Seq(
         tokenizer,
         model=model,
         label_pad_token_id=label_pad_token_id,
