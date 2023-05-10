@@ -895,14 +895,14 @@ def forwardCE(
             ce = []
             for i in range(labels.shape[0]):#iterate across number of individual samples in bundle
               ce.append(
-                  '''
-                  get_first_token_likelihood(
-                      self, #the model itself
-                      input_ids.roll(i, 0), #question conditional, so try each question with each answer
-                      labels,
-                      attention_mask.roll(i, 0)
-                  )
-                  ''' # # # Replace this with the better version
+                  #
+                  #get_first_token_likelihood(
+                  #    self, #the model itself
+                  #    input_ids.roll(i, 0), #question conditional, so try each question with each answer
+                  #    labels,
+                  #    attention_mask.roll(i, 0)
+                  #)
+                  # # # # Replace this with the better version
                   get_first_token_likelihood_from_logits(
                       # # # # # self, #the model itself
                       # # # # # input_ids.roll(i, 0), #question conditional, so try each question with each answer
