@@ -1,4 +1,5 @@
 # # # Setup Hyperparameters
+lam = 1 # # # Default value
 with open('../../../hparams','r') as hparams:
     exec(hparams.read())
 
@@ -745,6 +746,17 @@ def get_first_token_likelihood(model, input_ids, out_ids, attention_mask_full = 
   score = softmaxedScores[iterInstances,out_ids[:,1]] 
   # # # score.requires_grad = True
   return score
+# # # # # def get_first_token_likelihood_from_logits(model, input_ids, out_ids, attention_mask_full = None, decode_in_tokens = None, logits=None):
+def get_first_token_likelihood_from_logits(out_ids, logits=None):
+    '''
+    This is a MUCH more efficient version of the above, because you don't have to run the forward pass to generate the logits again
+    '''
+    scores = logits[:,0,:]
+
+    softmaxedScores = torch.log(torch.softmax(scores,dim=1))#also transform to log-likelihood
+    score = softmaxedScores[range(out_ids.shape[0]),out_ids[:,1]] 
+
+    return score
 
 import copy
 import math
@@ -883,11 +895,20 @@ def forwardCE(
             ce = []
             for i in range(labels.shape[0]):#iterate across number of individual samples in bundle
               ce.append(
+                  '''
                   get_first_token_likelihood(
                       self, #the model itself
                       input_ids.roll(i, 0), #question conditional, so try each question with each answer
                       labels,
                       attention_mask.roll(i, 0)
+                  )
+                  ''' # # # Replace this with the better version
+                  get_first_token_likelihood_from_logits(
+                      # # # # # self, #the model itself
+                      # # # # # input_ids.roll(i, 0), #question conditional, so try each question with each answer
+                      labels,
+                      # # # # # attention_mask.roll(i, 0)
+                      lm_logits
                   ) 
               )
             z = torch.log( #normalizing denominator
