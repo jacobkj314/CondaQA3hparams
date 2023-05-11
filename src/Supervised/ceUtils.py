@@ -895,20 +895,10 @@ def forwardCE(
             ce = []
             for i in range(labels.shape[0]):#iterate across number of individual samples in bundle
               ce.append(
-                  #
-                  #get_first_token_likelihood(
-                  #    self, #the model itself
-                  #    input_ids.roll(i, 0), #question conditional, so try each question with each answer
-                  #    labels,
-                  #    attention_mask.roll(i, 0)
-                  #)
-                  # # # # Replace this with the better version
+
                   get_first_token_likelihood_from_logits(
-                      # # # # # self, #the model itself
-                      # # # # # input_ids.roll(i, 0), #question conditional, so try each question with each answer
                       labels,
-                      # # # # # attention_mask.roll(i, 0)
-                      lm_logits.roll(i, 0) [:,0,:] # # # pre-squeeze the logits
+                      lm_logits[:,0,:].roll(i, 0) # # # pre-squeeze the logits (all instances, only the first token, all logits) and then roll the instances (akin to rolling the inputs)
                   ) 
               )
             z = torch.log( #normalizing denominator

@@ -505,7 +505,7 @@ def main():
     # # # I also created a separate preprocess_function with bundles for the training set only
     def preprocess_function_bundles(examples): #with bundles
 
-        padding = True # # # I changed the value of padding
+        padding = "max_length" # # # I changed the value of padding
 
         inputs = examples[text_column]
         targets = examples[summary_column]
