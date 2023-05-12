@@ -1,8 +1,10 @@
 # # # Setup Hyperparameters
 lam = 1 # # # Default value
-with open('../../../hparams','r') as hparams:
-    exec(hparams.read())
-
+try:
+    with open('../../../hparams','r') as hparams:
+        exec(hparams.read())
+except:
+    pass
 # # #Bundling Setup Code
 
 def bundling(batch): 
