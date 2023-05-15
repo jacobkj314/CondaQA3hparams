@@ -177,12 +177,12 @@ def main(args):
     OUTPUT_DIR = best_checkpoint
 
     # Evaluate on test set
-
+    # # # changed test to dev on line 185
     test_command = "python run_negatedqa_t5.py \
     --model_name_or_path {OUTPUT_DIR} \
     --train_file {DATA_DIR}condaqa_train_unifiedqa.json \
     --validation_file {DATA_DIR}condaqa_dev_unifiedqa.json \
-    --test_file {DATA_DIR}condaqa_test_unifiedqa.json \
+    --test_file {DATA_DIR}condaqa_dev_unifiedqa.json \
     --do_eval \
     --do_predict \
     --predict_with_generate \
