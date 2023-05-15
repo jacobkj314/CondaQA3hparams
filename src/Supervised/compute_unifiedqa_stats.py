@@ -11,7 +11,7 @@ def get_args():
     parser.add_argument("--predictions_dir", type=str, default="./predictions/", help="dir with all the checkpoints")
     parser.add_argument("--model_name", type=str, default="unifiedqa-v2-t5-base-1251000")
     parser.add_argument("--validation_filename", type=str, default="../../data/condaqa_dev.json")
-    parser.add_argument("--test_filename", type=str, default="../../data/condaqa_test.json")
+    parser.add_argument("--test_filename", type=str, default="../../data/condaqa_dev.json") # # # changed test to dev
     parser.add_argument("--seed", type=str, default="70")
     parser.add_argument("--output_dir", type=str, default="./")
     args = parser.parse_args()
